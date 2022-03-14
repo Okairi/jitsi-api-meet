@@ -18,12 +18,12 @@ export default {
   // enableLipSync: false,
   // clientNode: "https://jitsi.org/jitsimeet",
   // enableP2P: true,
-  // p2p: {
-  //   enabled: true,
-  //   preferH264: true,
-  //   disableH264: true,
-  //   useStunTurn: true,
-  // },
+  p2p: {
+    enabled: false,
+    //disableCodec
+    //preferredCodec
+    // useStunTurn: true,
+  },
   // disableSimulcast: false,
   // enableRemb: true,
   // enableTcc: true,

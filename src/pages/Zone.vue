@@ -21,7 +21,12 @@ export default defineComponent({
 
     const goMeet = () => {
       setRoomName(roomName.value);
-      router.push({ name: "meet" });
+      router.push({
+        name: "meet",
+        query: {
+          room: roomName.value,
+        },
+      });
     };
     return {
       roomName,

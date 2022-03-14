@@ -1,0 +1,11 @@
+.user {
+  &__ui {
+    border: 1px solid green;
+    width: 250px;
+    border-radius: 10px;
+    padding: 10px;
+    video {
+      width: 100%;
+    }
+  }
+}

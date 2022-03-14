@@ -8,6 +8,7 @@ const routes = [
     path: "/meet",
     name: "meet",
     component: () => import("pages/Index.vue"),
+    props: (route) => ({ query: route.query.room }),
   },
 
   // Always leave this as last one,
