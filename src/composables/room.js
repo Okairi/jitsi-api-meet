@@ -14,11 +14,13 @@ const remoteaudioTracks = ref([]);
 const localTracks = ref([]);
 const participants = ref([]);
 const user = reactive({
+  id: "",
   micOn: true,
   cameraOn: true,
   name: "",
   tracks: [],
   screenShared: false,
+  videoActivated: true,
 });
 
 export function useRoom() {

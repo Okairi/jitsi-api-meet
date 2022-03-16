@@ -1,8 +1,6 @@
 import JitsiMeetJS from "@solyd/lib-jitsi-meet";
 import options from "./config";
 import { useRoom } from "../composables/room";
-import $ from "jquery";
-window.$ = $;
 
 const {
   videoTracks,
@@ -27,7 +25,9 @@ const remoteTracks = {};
 let participantIds = new Set();
 let roomtep = "";
 
-JitsiMeetJS.init();
+JitsiMeetJS.init({
+  disableAudioLevels: false,
+});
 JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
 export function createTracksToAddedinRoom(room) {
@@ -71,9 +71,9 @@ function diconnectAll() {
 
 function onConferenceJoined() {
   console.log(" 🚀UNIÉNDOSE A LA CONFERENCIA ");
-
   joined = true;
   // agregar tracks a la sala
+  updateUser({ id: room.myUserId() });
   localTracks.value.forEach((track) => {
     room.addTrack(track);
   });
@@ -85,9 +85,10 @@ function onRemoteTracks(track) {
   if (!remoteTracks[participant]) {
     remoteTracks[participant] = [];
   }
-  console.log("PARTICIPANTES EN SALA", participants.value);
   setFilterRemoteTrack(track);
-
+  // if(track.getType() == 'video'){
+  //   track.attach()
+  // }
   // setea track remoto
   const idx = remoteTracks[participant].push(track);
   // console.log("remotTRACKS 🤔", remoteTracks);
@@ -102,8 +103,7 @@ function onRemoteTracks(track) {
   // track.attach($(`#${id}`)[0]);
 }
 function onUserJoined(arg, user) {
-  console.log("UNIENDOSE EN AL SALA", user);
-  console.log("user tracks from args", user._tracks);
+  console.log("SOLO USER JOINED REMOTO");
   if (!participants.value.includes(arg)) {
     participantIds.add(arg);
     setParticipants({
@@ -114,6 +114,7 @@ function onUserJoined(arg, user) {
       cameraOn: true,
       screenShared: false,
       tracks: user._tracks,
+      videoActivated: true,
     });
   }
 
@@ -127,6 +128,39 @@ function onUserLeft(arg, user) {
   });
   participantIds.delete(arg);
   // room.selectParticipant(Array.from(participantIds));
+}
+function getUserById(id) {
+  return participants.value.find((p) => p.id == id);
+}
+
+function handleHi(args) {
+  console.log("comando sayhi recibido", args);
+  const user = getUserById(args.value);
+  if (user) {
+    user.videoActivated = false;
+    user.cameraOn = false;
+  }
+}
+function turnOnCamera(args) {
+  const user = getUserById(args.value);
+  if (user) {
+    user.videoActivated = true;
+    user.cameraOn = true;
+  }
+}
+
+function turnOnMicrophone(args) {
+  const user = getUserById(args.value);
+  if (user) {
+    user.micOn = true;
+  }
+}
+
+function turnOffMicrophone(args) {
+  const user = getUserById(args.value);
+  if (user) {
+    user.micOn = false;
+  }
 }
 
 function onSuccessConnection() {
@@ -161,6 +195,10 @@ function onSuccessConnection() {
   room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
     console.log("track cambiado", track);
   });
+  room.addCommandListener("sayhi", handleHi);
+  room.addCommandListener("saybye", turnOnCamera);
+  room.addCommandListener("MIC_ON", turnOnMicrophone);
+  room.addCommandListener("MIC_OFF", turnOffMicrophone);
   room.setDisplayName(userName.value);
   setRoomInstance(room);
   room.join();
@@ -174,7 +212,6 @@ function handleLocalTracks(tracks) {
   console.log("PARTICPANTE UNIDO?");
   localTracks.value.forEach((track) => {
     if (joined) {
-      console.log("LOCAL TRACK JOINED?");
       room.addTrack(track);
     }
   });

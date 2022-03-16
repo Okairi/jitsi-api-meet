@@ -1,11 +1,44 @@
-.user {
-  &__ui {
+.room-meet {
+  width: 100vw;
+  height: 100vh;
+  .user {
     border: 1px solid green;
     width: 250px;
+    height: 250px;
     border-radius: 10px;
     padding: 10px;
-    video {
+    display: flex;
+    flex-direction: column;
+    .videoWrapper {
       width: 100%;
+      flex: 0.8;
+      video {
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    &__card {
+      width: 100%;
+      flex: 0.8;
+      .userImage {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+      }
+      p {
+        text-transform: uppercase;
+      }
+    }
+  }
+  .statistics {
+    border: 1px solid #212121;
+    border-radius: 10px;
+    width: 12rem;
+    height: 10rem;
+    .list {
+      height: 60%;
+      overflow: auto;
     }
   }
 }
