@@ -17,6 +17,7 @@ const {
   updateUser,
   participants,
   setFilterRemoteTrack,
+  remotevideoTracks,
 } = useRoom();
 
 let room = null;
@@ -56,8 +57,9 @@ export function createAndJoinRoom(connection, roomName) {
 }
 
 function diconnectAll() {
-  videoTracks.value.forEach((track) => track.dispose());
-  audioTracks.value.forEach((track) => track.dispose());
+  localTracks.value.forEach((track) => {
+    track.dispose();
+  });
 
   if (room) {
     room.leave();
@@ -78,17 +80,16 @@ function onConferenceJoined() {
 }
 function onRemoteTracks(track) {
   const participant = track.getParticipantId();
-  console.log("ID REMOTO", participant);
-  console.log("TRACK DEL REMOTO", track);
   // confirmar si existe
+  console.log("tipo-track-as>", track.getType());
   if (!remoteTracks[participant]) {
-    console.log("tipo-track-as>", track.getType());
     remoteTracks[participant] = [];
   }
+  console.log("PARTICIPANTES EN SALA", participants.value);
   setFilterRemoteTrack(track);
 
   // setea track remoto
-  // const idx = remoteTracks[participant].push(track);
+  const idx = remoteTracks[participant].push(track);
   // console.log("remotTRACKS 🤔", remoteTracks);
 
   // const id = participant + track.getType() + idx;
@@ -101,10 +102,19 @@ function onRemoteTracks(track) {
   // track.attach($(`#${id}`)[0]);
 }
 function onUserJoined(arg, user) {
-  participantIds.add(arg);
+  console.log("UNIENDOSE EN AL SALA", user);
+  console.log("user tracks from args", user._tracks);
   if (!participants.value.includes(arg)) {
-    console.log("USER NUEVO ÚNICO", user);
-    setParticipants({ id: arg, participant: user });
+    participantIds.add(arg);
+    setParticipants({
+      id: arg,
+      participant: user,
+      name: user._displayName,
+      micOn: true,
+      cameraOn: true,
+      screenShared: false,
+      tracks: user._tracks,
+    });
   }
 
   // room.selectParticipant(Array.from(participantIds));
@@ -121,18 +131,36 @@ function onUserLeft(arg, user) {
 
 function onSuccessConnection() {
   //Crear conferencia
-  room = connection.initJitsiConference(roomtep, {});
+  room = connection.initJitsiConference(roomtep, {
+    p2p: {
+      enabled: false,
+    },
+  });
   getLocalTracks();
 
   room.on(JitsiMeetJS.events.conference.TRACK_ADDED, (track) => {
     !track.isLocal() && onRemoteTracks(track);
   });
-  room.on(JitsiMeetJS.events.conference.TRACK_ADDED, (track) => {
-    console.log("TRACK REMOVED", track);
+  room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
+    console.log("REMOVED TRACK", track);
+    const index = remotevideoTracks.value.findIndex(
+      (rm) => rm.getId() == track.getId()
+    );
+    console.log("index encontrado del elminado", index);
+    console.log("remotevideotr", remotevideoTracks.value);
+    // if (index > 0) {
+    //   remotevideoTracks.value.splice(index, 1);
+    // }
+    const participantId = track.getParticipantId();
+    delete remoteTracks[participantId];
+    const ownser = participants.value.find((p) => p.id == participantId);
   });
   room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, onConferenceJoined);
   room.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
   room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
+  room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
+    console.log("track cambiado", track);
+  });
   room.setDisplayName(userName.value);
   setRoomInstance(room);
   room.join();
@@ -143,14 +171,13 @@ function handleLocalTracks(tracks) {
   updateUser({
     tracks: [...tracks],
   });
+  console.log("PARTICPANTE UNIDO?");
   localTracks.value.forEach((track) => {
     if (joined) {
-      console.log("PARTICPANTE UNIDO?");
+      console.log("LOCAL TRACK JOINED?");
       room.addTrack(track);
     }
   });
-  // revisar la unión a la sala
-  // se deben cargar los tracks a la vista
 }
 
 function getLocalTracks() {

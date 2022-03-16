@@ -24,6 +24,8 @@ export default {
     //preferredCodec
     // useStunTurn: true,
   },
+  useIPv6: false,
+  disableAudioLevels: false,
   // disableSimulcast: false,
   // enableRemb: true,
   // enableTcc: true,

@@ -1,0 +1,29 @@
+.lobbyWrapper {
+  .previewWrapper {
+    width: 450px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    .videoContainer {
+      flex: 0.9;
+      video {
+        width: 100%;
+      }
+      .userAvatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #212121;
+        height: 100%;
+        .userImage {
+          width: 100px;
+          height: 100px;
+          object-fit: contain;
+        }
+      }
+    }
+    .controls {
+      flex: 0.1;
+    }
+  }
+}

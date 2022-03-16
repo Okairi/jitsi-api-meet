@@ -6,28 +6,8 @@
     <div class="user">
       <p>LOCAL {{ user.name }}</p>
       <div class="user__ui column items-center">
-        <video
-          v-for="track in videoTracks"
-          :key="track.getId()"
-          :srcObject.prop="track.stream"
-          :ref="
-            ($el) => {
-              videos[track.getId()] = $el;
-            }
-          "
-          autoplay
-        ></video>
-        <audio
-          v-for="track in audioTracks"
-          :key="track.getId()"
-          :ref="
-            ($el) => {
-              audios[track.getId()] = $el;
-            }
-          "
-          autoplay
-          muted
-        ></audio>
+        <video ref="videoTracks" autoplay muted></video>
+        <audio ref="audioTracks" autoplay muted></audio>
         <div class="row items-center justify-around full-width">
           <q-btn
             dense
@@ -43,16 +23,33 @@
             :icon="user.micOn ? 'mic' : 'mic_off'"
             @click="toggleMic"
           />
+          <q-btn
+            dense
+            round
+            class="bg-amber"
+            :icon="
+              user.screenShared ? 'desktop_windows' : 'desktop_access_disabled'
+            "
+            @click="shareScreen"
+          />
         </div>
       </div>
     </div>
+    N°participants:{{ participants.length }}
+    <br />
+    videotracks->{{ remotevideoTracks.length }}
     <div v-if="participants.length > 0" class="participant-container">
-      <label v-for="p in participants" :key="p.id">
-        {{ p.participant._displayName }}
-      </label>
+      <br />
+      <br />
       <div class="user">
-        <div class="user__ui remote column items-center">
-          {{ remotevideoTracks.length }}
+        <br />
+        <div
+          v-for="p in participants"
+          :key="p.id"
+          class="user__ui remote column items-center"
+        >
+          <label>{{ p.id }} - {{ p.name }}</label>
+          <!-- render tracks -->
           <video
             v-for="track in remotevideoTracks"
             :key="track.getId()"
@@ -74,22 +71,6 @@
             "
             autoplay
           ></audio>
-          <!-- <div class="row items-center justify-around full-width">
-            <q-btn
-              dense
-              round
-              class="bg-amber"
-              :icon="user.cameraOn ? 'videocam' : 'videocam_off'"
-              @click="toggleCamera"
-            />
-            <q-btn
-              dense
-              round
-              class="bg-amber"
-              :icon="user.micOn ? 'mic' : 'mic_off'"
-              @click="toggleMic"
-            />
-          </div> -->
         </div>
       </div>
     </div>
@@ -149,9 +130,11 @@ export default defineComponent({
       // set container
       void nextTick(() => {
         if (track.getType() == "audio") {
-          track.attach(audios.value[track.getId()]);
+          track.attach(audiotracks.value);
+          // track.attach(audios.value[track.getId()]);
         } else if (track.getType() == "video") {
-          track.attach(videos.value[track.getId()]);
+          track.attach(videoTracks.value);
+          // track.attach(videos.value[track.getId()]);
         }
       });
     };
@@ -170,7 +153,13 @@ export default defineComponent({
     watch(
       () => localTracks.value,
       (newval) => {
-        localTracks.value.forEach((track) => addTrack(track));
+        localTracks.value.forEach((track) => {
+          if (track.getType() == "audio") {
+            track.attach(audioTracks.value);
+          } else {
+            track.attach(videoTracks.value);
+          }
+        });
       }
     );
     watch(
@@ -180,11 +169,13 @@ export default defineComponent({
         remoteaudioTracks.value.forEach((track) => {
           void nextTick(() => {
             track.attach(audiosR.value[track.getId()]);
+            console.log("refs de audios->", audiosR.value);
           });
         });
         remotevideoTracks.value.forEach((track) => {
           void nextTick(() => {
             track.attach(videosR.value[track.getId()]);
+            console.log("refs de videos->", videosR.value);
           });
         });
       }
@@ -216,24 +207,55 @@ export default defineComponent({
     const endMeeting = () => {
       // clean and redirect
       connectionInstance.value.disconnect();
-      router.push({ name: "home" });
+      router.push({ name: "end" });
     };
 
     const toggleCamera = () => {
+      const videoLocalTrack = localTracks.value.find(
+        (track) => track.getType() == "video"
+      );
       if (user.cameraOn) {
-        videoTracks.value[0].mute();
+        videoLocalTrack.mute();
       } else {
-        videoTracks.value[0].unmute();
+        videoLocalTrack.unmute();
       }
       updateUser({ cameraOn: !user.cameraOn });
     };
     const toggleMic = () => {
+      console.log("room instance", roomInstance.value);
+      const audioLocalTrack = localTracks.value.find(
+        (track) => track.getType() == "audio"
+      );
       if (user.micOn) {
-        audioTracks.value[0].mute();
+        audioLocalTrack.mute();
       } else {
-        audioTracks.value[0].unmute();
+        audioLocalTrack.unmute();
       }
       updateUser({ micOn: !user.micOn });
+    };
+
+    const shareScreen = async () => {
+      // dispose video
+      updateUser({ screenShared: !user.screenShared });
+      // remove video local
+      // localTracks.value.forEach((track) => {
+      //   if (track.getType() == "video") {
+      //     track.detach(videoTracks.value);
+      //   }
+      // });
+      if (localTracks.value[1]) {
+        localTracks.value[1].dispose();
+        localTracks.value.pop();
+      }
+      console.log("local sin cámara->", localTracks.value);
+      const desktopTrack = await JitsiMeetJS.createLocalTracks({
+        devices: [user.screenShared ? "desktop" : "video"],
+      });
+      localTracks.value.push(desktopTrack[0]);
+      void nextTick(() => {
+        localTracks.value[1].attach(videoTracks.value);
+      });
+      roomInstance.value.addTrack(localTracks.value[1]);
     };
 
     return {
@@ -254,6 +276,7 @@ export default defineComponent({
       updateUser,
       toggleMic,
       roomInstance,
+      shareScreen,
     };
   },
 });

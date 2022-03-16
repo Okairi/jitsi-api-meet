@@ -6,8 +6,8 @@ const userName = ref("");
 const roomInstance = ref({});
 const connectionInstance = ref({});
 
-const videoTracks = ref([]);
-const audioTracks = ref([]);
+const videoTracks = ref({});
+const audioTracks = ref({});
 const remotevideoTracks = ref([]);
 const remoteaudioTracks = ref([]);
 
@@ -18,6 +18,7 @@ const user = reactive({
   cameraOn: true,
   name: "",
   tracks: [],
+  screenShared: false,
 });
 
 export function useRoom() {
@@ -37,9 +38,9 @@ export function useRoom() {
   };
   const setFilterTracks = (track) => {
     if (track.getType() == "audio") {
-      audioTracks.value.push(track);
+      audioTracks.value = track;
     } else if (track.getType() == "video") {
-      videoTracks.value.push(track);
+      videoTracks.value = track;
     }
   };
 
@@ -54,8 +55,10 @@ export function useRoom() {
   };
 
   const setFilterRemoteTrack = (track) => {
-    const remoteAudioNew = _.cloneDeep(remoteaudioTracks.value);
-    const remoteVideoNew = _.cloneDeep(remotevideoTracks.value);
+    let remoteAudioNew = [];
+    remoteAudioNew = _.cloneDeep(remoteaudioTracks.value);
+    let remoteVideoNew = [];
+    remoteVideoNew = _.cloneDeep(remotevideoTracks.value);
     if (track.getType() == "audio") {
       remoteAudioNew.push(track);
       remoteaudioTracks.value = remoteAudioNew;
