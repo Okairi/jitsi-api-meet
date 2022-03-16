@@ -117,8 +117,6 @@ function onUserJoined(arg, user) {
       videoActivated: true,
     });
   }
-
-  // room.selectParticipant(Array.from(participantIds));
 }
 
 function onUserLeft(arg, user) {
