@@ -103,6 +103,12 @@
         </p>
       </div>
     </section>
+    <input placeholder="Ingresa el mensaje" v-model="message" />
+
+    <br /><br /><br />
+
+    <textarea name="" id="" cols="30" rows="10"></textarea>
+    <q-btn @click="sendMessage" label="Send Message" />
   </section>
 </template>
 
@@ -127,6 +133,7 @@ import {
   createTracksToAddedinRoom,
   createAndJoinRoom,
   connect,
+  sendMessage,
 } from "../utils/jitsi";
 import { useRoom } from "../composables/room";
 export default defineComponent({
@@ -149,6 +156,7 @@ export default defineComponent({
       updateUser,
       user,
       roomInstance,
+      testeoSend,
     } = useRoom();
     const audios = ref([]);
     const videos = ref([]);
@@ -156,6 +164,7 @@ export default defineComponent({
     const videosR = ref([]);
     const theroom = route.query.room;
     const userNameQuery = route.query.user;
+    const message = ref("");
 
     watch(
       () => localTracks.value,
@@ -280,6 +289,9 @@ export default defineComponent({
       });
       roomInstance.value.addTrack(localTracks.value[1]);
     };
+    const sendMessage = () => {
+      sendMessage;
+    };
 
     return {
       audioTracks,
@@ -301,6 +313,8 @@ export default defineComponent({
       roomInstance,
       shareScreen,
       totalParticipants,
+      sendMessage,
+      message,
     };
   },
 });
