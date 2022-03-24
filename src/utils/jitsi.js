@@ -32,7 +32,7 @@ JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
 export function createTracksToAddedinRoom(room) {
   JitsiMeetJS.createLocalTracks({
-    devices: ["video", "audio"],
+    devices: ["audio"],
   })
     .then((tracks) => {
       tracks.forEach((track) => {
@@ -69,6 +69,20 @@ function diconnectAll() {
   }
 }
 
+// export const sendMessage = () => {
+// room.sendMessage("hello").then(() => {
+//   console.log("test");
+// });
+// };
+
+// export const sendMessage = async () => {
+//   if (room) {
+//     room.on.sendTextMessage("test");
+//   } else {
+//     room.on.sendTextMessage("default");
+//   }
+// };
+
 function onConferenceJoined() {
   console.log(" 🚀UNIÉNDOSE A LA CONFERENCIA ");
   joined = true;
@@ -102,6 +116,7 @@ function onRemoteTracks(track) {
   // }
   // track.attach($(`#${id}`)[0]);
 }
+
 function onUserJoined(arg, user) {
   console.log("SOLO USER JOINED REMOTO");
   if (!participants.value.includes(arg)) {
@@ -130,6 +145,9 @@ function onUserLeft(arg, user) {
 function getUserById(id) {
   return participants.value.find((p) => p.id == id);
 }
+export const sendMessage = () => {
+  room.sendTextMessage("hello");
+};
 
 function handleHi(args) {
   console.log("comando sayhi recibido", args);
@@ -190,6 +208,16 @@ function onSuccessConnection() {
   room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, onConferenceJoined);
   room.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
   room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
+  room.on(
+    JitsiMeetJS.events.conference.MESSAGE_RECEIVED,
+    (id, message, timestamp) => {
+      handleReceivedMessage({
+        id,
+        message,
+        timestamp,
+      });
+    }
+  );
   room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
     console.log("track cambiado", track);
   });
@@ -216,7 +244,7 @@ function handleLocalTracks(tracks) {
 }
 
 function getLocalTracks() {
-  JitsiMeetJS.createLocalTracks({ devices: ["audio", "video"] })
+  JitsiMeetJS.createLocalTracks({ devices: ["audio"] })
     .then(handleLocalTracks)
     .catch((error) => console.log(error));
 }
