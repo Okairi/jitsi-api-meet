@@ -16,6 +16,7 @@ const {
   participants,
   setFilterRemoteTrack,
   remotevideoTracks,
+  addMessages,
 } = useRoom();
 
 let room = null;
@@ -142,11 +143,26 @@ function onUserLeft(arg, user) {
   participantIds.delete(arg);
   // room.selectParticipant(Array.from(participantIds));
 }
+function on_recived(id, message, timestamp) {
+  console.log("Recibiendo mensaje", {
+    id,
+    message,
+    timestamp,
+  });
+  addMessages({ id, message });
+}
+
 function getUserById(id) {
   return participants.value.find((p) => p.id == id);
 }
-export const sendMessage = () => {
-  room.sendTextMessage("hello");
+export const testeoMessage = (userData) => {
+  // room.sendMessage(userData);
+
+  room.sendTextMessage(userData);
+};
+
+export const listMessage = () => {
+  room.sendTextMessage(userData);
 };
 
 function handleHi(args) {
@@ -208,16 +224,7 @@ function onSuccessConnection() {
   room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, onConferenceJoined);
   room.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
   room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
-  room.on(
-    JitsiMeetJS.events.conference.MESSAGE_RECEIVED,
-    (id, message, timestamp) => {
-      handleReceivedMessage({
-        id,
-        message,
-        timestamp,
-      });
-    }
-  );
+  room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, on_recived);
   room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
     console.log("track cambiado", track);
   });

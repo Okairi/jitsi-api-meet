@@ -9,6 +9,7 @@ const routes = [
     name: "meet",
     component: () => import("pages/Index.vue"),
     props: (route) => ({ query: route.query.room }),
+    props: (route) => ({ query: route.query.name }),
   },
   {
     path: "/end",

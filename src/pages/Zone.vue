@@ -25,6 +25,7 @@ export default defineComponent({
         name: "meet",
         query: {
           room: roomName.value,
+          name: userName.value,
         },
       });
     };

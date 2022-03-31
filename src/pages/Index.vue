@@ -103,11 +103,28 @@
         </p>
       </div>
     </section>
+
+    <br /><br /><br />
     <input placeholder="Ingresa el mensaje" v-model="message" />
 
     <br /><br /><br />
+    Super chat en vivo
+    <!-- 
+    <div v-for="data in dataMessage" :key="data.id">
+      <span>User : {{ userName }} : {{ data.message }} </span>
+    </div> -->
 
-    <textarea name="" id="" cols="30" rows="10"></textarea>
+    <div class="row justify-center">
+      <div style="width: 100%; max-width: 400px">
+        <q-chat-message
+          v-for="data in dataMessage"
+          :key="data.id"
+          :text="[data.message]"
+          sent
+        />
+      </div>
+    </div>
+
     <q-btn @click="sendMessage" label="Send Message" />
   </section>
 </template>
@@ -133,7 +150,7 @@ import {
   createTracksToAddedinRoom,
   createAndJoinRoom,
   connect,
-  sendMessage,
+  testeoMessage,
 } from "../utils/jitsi";
 import { useRoom } from "../composables/room";
 export default defineComponent({
@@ -156,7 +173,8 @@ export default defineComponent({
       updateUser,
       user,
       roomInstance,
-      testeoSend,
+      dataMessage,
+      userName,
     } = useRoom();
     const audios = ref([]);
     const videos = ref([]);
@@ -225,6 +243,9 @@ export default defineComponent({
       connectionInstance.value.disconnect();
       router.push({ name: "end" });
     };
+    const sendMessage = () => {
+      testeoMessage(message.value);
+    };
 
     const toggleCamera = () => {
       const videoLocalTrack = localTracks.value.find(
@@ -289,8 +310,9 @@ export default defineComponent({
       });
       roomInstance.value.addTrack(localTracks.value[1]);
     };
-    const sendMessage = () => {
-      sendMessage;
+
+    const getUser = () => {
+      console.log(this.$route.query.test);
     };
 
     return {
@@ -315,6 +337,9 @@ export default defineComponent({
       totalParticipants,
       sendMessage,
       message,
+      dataMessage,
+      getUser,
+      userName,
     };
   },
 });

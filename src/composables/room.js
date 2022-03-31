@@ -5,6 +5,7 @@ const roomName = ref("");
 const userName = ref("");
 const roomInstance = ref({});
 const connectionInstance = ref({});
+const dataMessage = ref([]);
 
 const videoTracks = ref({});
 const audioTracks = ref({});
@@ -73,6 +74,10 @@ export function useRoom() {
     Object.assign(user, { ...user, ...payload });
   };
 
+  const addMessages = (val) => {
+    dataMessage.value.push(val);
+  };
+
   return {
     roomName,
     setRoomName,
@@ -94,5 +99,7 @@ export function useRoom() {
     participants,
     user,
     updateUser,
+    addMessages,
+    dataMessage,
   };
 }
