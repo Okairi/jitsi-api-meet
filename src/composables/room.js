@@ -75,7 +75,7 @@ export function useRoom() {
   };
 
   const addMessages = (val) => {
-    dataMessage.value.push(val);
+    dataMessage.value = [...dataMessage.value, val];
   };
 
   return {

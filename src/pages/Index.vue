@@ -105,27 +105,39 @@
     </section>
 
     <br /><br /><br />
-    <input placeholder="Ingresa el mensaje" v-model="message" />
 
     <br /><br /><br />
     Super chat en vivo
-    <!-- 
-    <div v-for="data in dataMessage" :key="data.id">
-      <span>User : {{ userName }} : {{ data.message }} </span>
-    </div> -->
-
-    <div class="row justify-center">
-      <div style="width: 100%; max-width: 400px">
+    <br /><br />
+    <div class="menuChat row justify-center">
+      <div
+        v-for="data in dataMessage"
+        :key="data.id"
+        style="width: 100%; max-width: 400px"
+      >
         <q-chat-message
-          v-for="data in dataMessage"
-          :key="data.id"
+          v-if="data.id === '0903c0ef'"
           :text="[data.message]"
-          sent
+          :sent="data.id === '0903c0ef'"
         />
+
+        <q-chat-message v-if="data.id != '0903c0ef'" :text="[data.message]" />
       </div>
     </div>
+    <input
+      placeholder="Ingresa el mensaje"
+      v-model="message"
+      @keyup.enter="sendMessage"
+    />
 
     <q-btn @click="sendMessage" label="Send Message" />
+    <q-btn @click="getUserName" label="Get userName" />
+    <br />
+
+    <input v-model="idUser" /> Ingresar id del usuario a eliminar de la reunion
+    <q-btn @click="kickUser">Eliminar usuario</q-btn>
+
+    {{ dataMessage }}
   </section>
 </template>
 
@@ -151,6 +163,7 @@ import {
   createAndJoinRoom,
   connect,
   testeoMessage,
+  kickUser,
 } from "../utils/jitsi";
 import { useRoom } from "../composables/room";
 export default defineComponent({
@@ -183,6 +196,8 @@ export default defineComponent({
     const theroom = route.query.room;
     const userNameQuery = route.query.user;
     const message = ref("");
+    const idUser = ref("");
+    let statusSendMessage = ref(false);
 
     watch(
       () => localTracks.value,
@@ -244,7 +259,20 @@ export default defineComponent({
       router.push({ name: "end" });
     };
     const sendMessage = () => {
+      // if (dataMessage.idUser === idUser.value) {
+      //   testeoMessage(message.value, dataMessage);
+      // }
+      // if (dataMessage.value.idUser) {
+      //   testeoMessage(message.value);
+      //   message.value = "";
+      //   statusSendMessage.value = true;
+      // }
+
       testeoMessage(message.value);
+      message.value = "";
+    };
+    const kickUser = () => {
+      kickUser(idUser.value, "mal comportamiento");
     };
 
     const toggleCamera = () => {
@@ -311,8 +339,9 @@ export default defineComponent({
       roomInstance.value.addTrack(localTracks.value[1]);
     };
 
-    const getUser = () => {
-      console.log(this.$route.query.test);
+    const getUserName = () => {
+      console.log(user.id);
+      console.log("show datamessage [] : ", dataMessage.value);
     };
 
     return {
@@ -338,8 +367,11 @@ export default defineComponent({
       sendMessage,
       message,
       dataMessage,
-      getUser,
       userName,
+      getUserName,
+      kickUser,
+      idUser,
+      statusSendMessage,
     };
   },
 });
