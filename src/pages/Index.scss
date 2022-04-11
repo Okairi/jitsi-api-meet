@@ -1,6 +1,7 @@
 .room-meet {
   width: 100vw;
   height: 100vh;
+  padding: 20px;
   .user {
     border: 1px solid green;
     width: 250px;
@@ -8,7 +9,7 @@
     border-radius: 10px;
     padding: 10px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     .videoWrapper {
       width: 100%;
       flex: 0.8;
@@ -44,8 +45,37 @@
 }
 .menuChat {
   padding: 10px;
-  border: 3px solid #212121;
+  border: 3px solid #2f89bd;
   height: 400px;
   width: 400px;
   overflow: scroll;
+}
+
+.menuChat::-webkit-scrollbar {
+  width: 7px;
+}
+.alertHand {
+  border: 1px solid red;
+  border-radius: 250px;
+  margin: 20px auto;
+  text-align: center;
+  width: 50%;
+  padding: 20px;
+  background: rgb(9, 9, 121);
+  background: linear-gradient(
+    90deg,
+    rgba(9, 9, 121, 1) 2%,
+    rgba(9, 9, 121, 1) 12%,
+    rgb(76, 76, 180) 27%,
+    rgba(5, 84, 171, 1) 55%
+  );
+  color: white;
+}
+.containerChat {
+  gap: 10px;
+}
+.buttons {
+  width: 50%;
+  margin-bottom: 30px;
+  gap: 10px;
 }

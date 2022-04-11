@@ -18,9 +18,12 @@ const {
   remotevideoTracks,
   addMessages,
   user,
+  userUpHand,
+  addHandTestAdd,
 } = useRoom();
 
 let room = null;
+
 let connection = null;
 let joined = false;
 const remoteTracks = {};
@@ -159,9 +162,11 @@ function on_recived(id, message, timestamp) {
     id,
     message,
     timestamp,
-    user: this.user,
   });
-  addMessages({ id, message, user: this.user });
+  addMessages({ id, message, timestamp });
+}
+function onTalkMuted(args) {
+  console.log("onTalkMuted , estas hablando con el micro apagado", args);
 }
 
 function getUserById(id) {
@@ -172,7 +177,22 @@ export const testeoMessage = (userData) => {
 
   room.sendTextMessage(userData);
 };
+export const upHand = (name, values) => {
+  // room.sendMessage(userData);
+  room.sendCommandOnce(name, values);
+  addHandTestAdd(values.value);
+};
 
+function testComand(args) {
+  console.log("comando recibido ... arg hand up", args);
+  userUpHand.value = args.value;
+  console.log("El usuario que ha subido la mano es:", userUpHand.value);
+}
+
+export const testeoAudioMuteado = () => {
+  // room.sendMessage(userData);
+  onTalkMuted;
+};
 export const kickUser = (id, reason) => {
   // room.sendMessage(userData);
 
@@ -191,6 +211,7 @@ function handleHi(args) {
     user.cameraOn = false;
   }
 }
+
 function turnOnCamera(args) {
   const user = getUserById(args.value);
   if (user) {
@@ -243,7 +264,9 @@ function onSuccessConnection() {
   room.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
   room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
   room.on(JitsiMeetJS.events.conference.KICKED, onKicked);
+  room.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, onTalkMuted);
   room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, on_recived);
+  0;
   room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
     console.log("track cambiado", track);
   });
@@ -254,6 +277,7 @@ function onSuccessConnection() {
   room.setDisplayName(userName.value);
   setRoomInstance(room);
   room.join();
+  room.addCommandListener("tagName", testComand);
 }
 
 function handleLocalTracks(tracks) {

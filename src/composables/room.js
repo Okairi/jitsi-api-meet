@@ -11,9 +11,12 @@ const videoTracks = ref({});
 const audioTracks = ref({});
 const remotevideoTracks = ref([]);
 const remoteaudioTracks = ref([]);
-
 const localTracks = ref([]);
 const participants = ref([]);
+///
+const remoteAudioNew = ref([]);
+const remoteVideoNew = ref([]);
+
 const user = reactive({
   id: "",
   micOn: true,
@@ -23,6 +26,7 @@ const user = reactive({
   screenShared: false,
   videoActivated: true,
 });
+const userUpHand = ref([]);
 
 export function useRoom() {
   const setRoomName = (name) => {
@@ -58,16 +62,14 @@ export function useRoom() {
   };
 
   const setFilterRemoteTrack = (track) => {
-    let remoteAudioNew = [];
-    remoteAudioNew = _.cloneDeep(remoteaudioTracks.value);
-    let remoteVideoNew = [];
-    remoteVideoNew = _.cloneDeep(remotevideoTracks.value);
+    remoteAudioNew.value = _.cloneDeep(remoteaudioTracks.value);
+    remoteVideoNew.value = _.cloneDeep(remotevideoTracks.value);
     if (track.getType() == "audio") {
-      remoteAudioNew.push(track);
-      remoteaudioTracks.value = remoteAudioNew;
+      remoteAudioNew.value = [...remoteAudioNew.value, track];
+      remoteaudioTracks.value = remoteAudioNew.value;
     } else if (track.getType() == "video") {
-      remoteVideoNew.push(track);
-      remotevideoTracks.value = remoteVideoNew;
+      remoteVideoNew.value = [...remoteVideoNew.value, track];
+      remotevideoTracks.value = remoteVideoNew.value;
     }
   };
   const updateUser = (payload) => {
@@ -76,6 +78,9 @@ export function useRoom() {
 
   const addMessages = (val) => {
     dataMessage.value = [...dataMessage.value, val];
+  };
+  const addHandTestAdd = (val) => {
+    userUpHand.value = [...userUpHand.value, val];
   };
 
   return {
@@ -101,5 +106,7 @@ export function useRoom() {
     updateUser,
     addMessages,
     dataMessage,
+    userUpHand,
+    addHandTestAdd,
   };
 }

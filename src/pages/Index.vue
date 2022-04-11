@@ -1,5 +1,47 @@
 <template>
   <section class="room-meet relative-position">
+    <div class="alertHand" v-if="statusPop">
+      El usuario : {{ userUpHand }} esta levantando la mano
+      <q-icon name="pan_tool" color="blue" size="20px" />
+    </div>
+
+    Super chat en vivo
+    <br /><br />
+    <!-- super chat container -->
+    <div class="containerChat row justify-center items-center">
+      <div class="menuChat">
+        <div
+          v-for="(data, index) in dataMessage"
+          :key="index"
+          class="chatMessage"
+          style="width: 100%; max-width: 400px"
+        >
+          <q-chat-message :text="[data.message]" :sent="data.id === user.id" />
+        </div>
+      </div>
+    </div>
+    <br />
+    <div class="containerBUtton row justify-center">
+      <div class="buttons row justify-center no-wrap">
+        <input
+          placeholder="Ingresa el mensaje"
+          v-model="message"
+          @keyup.enter="sendMessage"
+        />
+
+        <q-btn
+          @click="getUserName"
+          icon="account_circle"
+          color="blue
+        "
+          size="14px"
+        />
+        <q-btn @click="mutedAudioAviso" icon="help" color="grey" />
+
+        <q-btn icon="pan_tool" @click="upHandTest" color="blue " />
+      </div>
+    </div>
+
     <p>Estas en el room {{ greatRoomName }}</p>
     <q-btn label="terminar reunión" @click="endMeeting" />
     <div class="user">
@@ -49,6 +91,7 @@
       </div>
     </div>
     <div v-if="participants.length > 0" class="participant-container">
+      <!-- COMENTADO POR EL MOMENTO  -->
       <div v-for="p in participants" :key="p.id" class="user">
         <div v-show="p.videoActivated" class="videoWrapper">
           {{ p.id }} - {{ p.name }}
@@ -58,7 +101,6 @@
                 videosR[p.id] = $el;
               }
             "
-            autoplay
           ></video>
         </div>
         <div
@@ -103,41 +145,6 @@
         </p>
       </div>
     </section>
-
-    <br /><br /><br />
-
-    <br /><br /><br />
-    Super chat en vivo
-    <br /><br />
-    <div class="menuChat row justify-center">
-      <div
-        v-for="data in dataMessage"
-        :key="data.id"
-        style="width: 100%; max-width: 400px"
-      >
-        <q-chat-message
-          v-if="data.id === '0903c0ef'"
-          :text="[data.message]"
-          :sent="data.id === '0903c0ef'"
-        />
-
-        <q-chat-message v-if="data.id != '0903c0ef'" :text="[data.message]" />
-      </div>
-    </div>
-    <input
-      placeholder="Ingresa el mensaje"
-      v-model="message"
-      @keyup.enter="sendMessage"
-    />
-
-    <q-btn @click="sendMessage" label="Send Message" />
-    <q-btn @click="getUserName" label="Get userName" />
-    <br />
-
-    <input v-model="idUser" /> Ingresar id del usuario a eliminar de la reunion
-    <q-btn @click="kickUser">Eliminar usuario</q-btn>
-
-    {{ dataMessage }}
   </section>
 </template>
 
@@ -163,7 +170,9 @@ import {
   createAndJoinRoom,
   connect,
   testeoMessage,
+  testeoAudioMuteado,
   kickUser,
+  upHand,
 } from "../utils/jitsi";
 import { useRoom } from "../composables/room";
 export default defineComponent({
@@ -188,6 +197,7 @@ export default defineComponent({
       roomInstance,
       dataMessage,
       userName,
+      userUpHand,
     } = useRoom();
     const audios = ref([]);
     const videos = ref([]);
@@ -197,6 +207,7 @@ export default defineComponent({
     const userNameQuery = route.query.user;
     const message = ref("");
     const idUser = ref("");
+    const statusPop = ref(false);
     let statusSendMessage = ref(false);
 
     watch(
@@ -271,6 +282,13 @@ export default defineComponent({
       testeoMessage(message.value);
       message.value = "";
     };
+
+    const mutedAudioAviso = () => {
+      if (user.micOn) {
+        testeoAudioMuteado(user.name);
+      }
+    };
+
     const kickUser = () => {
       kickUser(idUser.value, "mal comportamiento");
     };
@@ -341,7 +359,22 @@ export default defineComponent({
 
     const getUserName = () => {
       console.log(user.id);
-      console.log("show datamessage [] : ", dataMessage.value);
+      console.log("show datamessage asasdasd [] : ", dataMessage.value);
+    };
+
+    const upHandTest = () => {
+      statusPop.value = true;
+
+      const tagName = {
+        value: user.id,
+        attributes: {},
+        children: [],
+      };
+
+      upHand("tagName", tagName);
+
+      // console.log("Este usuario levantó la mano", userUpHand.value);
+      console.log(userUpHand.value);
     };
 
     return {
@@ -372,6 +405,10 @@ export default defineComponent({
       kickUser,
       idUser,
       statusSendMessage,
+      mutedAudioAviso,
+      upHandTest,
+      statusPop,
+      userUpHand,
     };
   },
 });
