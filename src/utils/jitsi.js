@@ -187,6 +187,7 @@ function testComand(args) {
   console.log("comando recibido ... arg hand up", args);
   userUpHand.value = args.value;
   console.log("El usuario que ha subido la mano es:", userUpHand.value);
+  //
 }
 
 export const testeoAudioMuteado = () => {
