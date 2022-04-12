@@ -1,7 +1,7 @@
 <template>
   <section class="room-meet relative-position">
-    <div class="alertHand" v-if="statusPop">
-      El usuario : {{ userUpHand }} esta levantando la mano
+    <div class="alertHand" v-for="item in userUpHand" :key="item.id">
+      El usuario : {{ item }} esta levantando la mano
       <q-icon name="pan_tool" color="blue" size="20px" />
     </div>
 
@@ -363,18 +363,28 @@ export default defineComponent({
     };
 
     const upHandTest = () => {
-      statusPop.value = true;
+      console.log("MANITOS", userUpHand.value);
+      //se encuentra usuario - se limpia
 
-      const tagName = {
-        value: user.id,
-        attributes: {},
-        children: [],
-      };
-
-      upHand("tagName", tagName);
-
-      // console.log("Este usuario levantó la mano", userUpHand.value);
-      console.log(userUpHand.value);
+      if (userUpHand.value.includes(user.id)) {
+        const clearTag = {
+          value: "",
+          attributes: {},
+          children: [],
+        };
+        userUpHand.value = [];
+        upHand("clear", clearTag);
+      } //no se encuentra - se mantiene
+      else {
+        const tagName = {
+          value: user.id,
+          attributes: {},
+          children: [],
+        };
+        upHand("tagName", tagName);
+        console.log(userUpHand.value);
+        userUpHand.value = [];
+      }
     };
 
     return {

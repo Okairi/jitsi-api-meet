@@ -180,13 +180,14 @@ export const testeoMessage = (userData) => {
 export const upHand = (name, values) => {
   // room.sendMessage(userData);
   room.sendCommandOnce(name, values);
-  addHandTestAdd(values.value);
 };
 
 function testComand(args) {
   console.log("comando recibido ... arg hand up", args);
-  userUpHand.value = args.value;
+
   console.log("El usuario que ha subido la mano es:", userUpHand.value);
+  addHandTestAdd(args.value);
+
   //
 }
 
